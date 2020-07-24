@@ -1,0 +1,46 @@
+---
+version: https://codecheck.org.uk/spec/config/1.0
+
+paper:
+  title: >
+    [Re] Connectivity reflects coding: a model of voltage-based STDP with homeostasis
+  authors:
+    - name: Rene Larisch
+      ORCID: https://orcid.org/0000-0003-3544-0631
+  reference: >
+    ReScience C (2019) 5, 3, 2
+    http://rescience.github.io/bibliography/Larisch_2019.html
+
+manifest:
+  - file: Fig1_clamp.png
+    comment: manuscript Figure 1 Left
+  - file: Fig1_window.png
+    comment: manuscript Figure 1 Middle
+  - file: Fig1_pairing.png
+    comment: manuscript Figure 1 Right
+  - file: Fig2_burst.png
+    comment: manuscript Figure 2
+  - file: Fig3_rateCode.png
+    comment: manuscript Figure 3a
+  - file: Fig3_rateCode_standardSTDP.png
+    comment: manuscript Figure 3b
+  - file: Fig3_temporalCode.png
+    comment: manuscript Figure 3c
+  - file: Fig3_temporalCode_standardSTDP.png
+    comment: manuscript Figure 3d
+  - file: Fig4_stable.png
+    comment: manuscript Figure 4a
+  - file: Fig4_RF.png
+    comment: manuscript Figure 4b
+
+codechecker:
+  - name: Iain Davies
+    ORCID: 0000-0002-5361-6285
+
+summary: >
+  This code had some difficulties involving the Python package ANNarchy. All scripts were eventually able to be run, and most figures were reproduced as in the ReScience paper. However two figures were very different from the originals.
+  Some figures also varied considerably when changing the seed. 
+repository: https://github.com/codecheckers/Larisch-reproduction
+check_time: "2020-07-23 10:00:00"
+certificate: 2020-005
+report: https://doi.org/10.5281/zenodo.3959175

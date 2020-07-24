@@ -1,0 +1,8 @@
+/home/id318/miniconda3/envs/ann_1/bin/cython -3 --cplus --include-dir /home/id318/miniconda3/envs/ann_1/lib/python3.8/site-packages/ANNarchy/core/cython_ext/ -D ANNarchyCore0.pyx 
+g++ -march=native -O2 -shared -fPIC -fpermissive -std=c++11 -fopenmp \
+        *.cpp -o ANNarchyCore0.so \
+        `/home/id318/miniconda3/envs/ann_1/bin/python3-config --includes` -I/home/id318/miniconda3/envs/ann_1/lib/python3.8/site-packages/numpy/core/include \
+        -I/home/id318/miniconda3/envs/ann_1/lib/python3.8/site-packages/ANNarchy/core/cython_ext/ \
+        -lpython3.8 \
+        -L/home/id318/miniconda3/envs/ann_1/lib 
+mv ANNarchyCore0.so ../..
