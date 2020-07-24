@@ -58,19 +58,28 @@ latex_summary_of_manifest(metadata, manifest_df, root)
 
 # Summary
 
-This code was (not) straightforward to codecheck.
-[... ADD MORE INTERESTING FINDINGS HERE..]
+The main difficulty in checking this code was the Python package ANNarchy. The version that the ReScience authors had used could not be made to work, so the latest ANNarchy version had to be used. Once this was installed all of the scripts ran and most produced figures matching those in the ReScience paper. However, two figures (Figure 1 Middle and Figure 2) did not match those in the paper. It was also found that changing the seeds from those used by the original authors produced significant variation in the figures.
 
 \clearpage
 
 # CODECHECKER notes
 
-The GitHub repo ...
-Code was written in ...
-I went through the following steps ...
-One hard problem was ...
+The original code was stored in the Github repo here: https://github.com/rLarisch/ReScience-submission/tree/Larisch-2019/code. Code was written in Python 3 and used the Python package ANNarchy extensively.
 
-This took ... minutes to complete on {a large workstation, my laptop}.
+To run the code I first cloned the repo in a Linux terminal. I then created a Conda environment called ann_1 in the cloned repo and installed the packages listed in the README:
+
+$ conda create -n ann_1
+$ conda activate ann_1
+$ conda install numpy cython pip
+$ pip install ANNarchy
+
+The individual figures could then be produced by running the respective scripts e.g.
+
+$ python Fig1_pairing.py
+
+The figures were automatically saved in the code directory. All scripts except Fig4_RF.py took less than 15 seconds to run. Fig4_RF.py took substantially longer at around 30 minutes.
+
+
 
 \setcounter{table}{0}
 \setcounter{figure}{0}
@@ -79,7 +88,7 @@ This took ... minutes to complete on {a large workstation, my laptop}.
 
 \clearpage
 
-```{r, echo=FALSE, fig.cap=manifest_df[1:7,"comment"]}
+```{r, echo=FALSE, fig.cap=manifest_df[1:10,"comment"]}
 # TODO turn into a loop 
 knitr::include_graphics(manifest_df[1, "dest"])
 cat('\n\n')
@@ -94,6 +103,12 @@ cat('\n\n')
 knitr::include_graphics(manifest_df[6, "dest"])
 cat('\n\n')
 knitr::include_graphics(manifest_df[7, "dest"])
+cat('\n\n')
+knitr::include_graphics(manifest_df[8, "dest"])
+cat('\n\n')
+knitr::include_graphics(manifest_df[9, "dest"])
+cat('\n\n')
+knitr::include_graphics(manifest_df[10, "dest"])
 ```
 
 \clearpage
