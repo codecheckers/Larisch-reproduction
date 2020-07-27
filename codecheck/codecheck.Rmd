@@ -58,28 +58,49 @@ latex_summary_of_manifest(metadata, manifest_df, root)
 
 # Summary
 
-The main difficulty in checking this code was the Python package ANNarchy. The version that the ReScience authors had used could not be made to work, so the latest ANNarchy version had to be used. Once this was installed all of the scripts ran and most produced figures matching those in the ReScience paper. However, two figures (Figure 1 Middle and Figure 2) did not match those in the paper. It was also found that changing the seeds from those used by the original authors produced significant variation in the figures.
-
-\clearpage
+The main difficulty in checking this code was the Python package ANNarchy. The version that the ReScience authors had used could not be made to work, so the latest ANNarchy version had to be used. Once this was installed all of the scripts ran and most produced figures matching those in the ReScience paper. However, two figures (Figure C2 and Figure C4) did not match those in the paper. It was also found that changing the seeds from those used by the original authors produced significant variation in the figures.
 
 # CODECHECKER notes
 
-The original code was stored in the Github repo here: https://github.com/rLarisch/ReScience-submission/tree/Larisch-2019/code. Code was written in Python 3 and used the Python package ANNarchy extensively.
+The original code was stored in the Github repo here: https://github.com/rLarisch/ReScience-submission/tree/Larisch-2019/code. Code was written in Python 3 and used the Python package ANNarchy extensively. The image data set for Figures C10 and C11 was stored here: https://www.rctn.org/bruno/sparsenet/IMAGES.mat.
 
-To run the code I first cloned the repo in a Linux terminal. I then created a Conda environment called ann_1 in the cloned repo and installed the packages listed in the README:
+To run the code I first cloned the repo in a Linux terminal and downloaded the image data set into this repo. I then created a Conda environment called ann_1 in the cloned repo and installed the packages listed in the README:
 
-$ conda create -n ann_1
-$ conda activate ann_1
-$ conda install numpy cython pip
-$ pip install ANNarchy
+    $ conda create -n ann_1  
+    $ conda activate ann_1  
+    $ conda install numpy cython pip  
+    $ pip install ANNarchy  
 
-The individual figures could then be produced by running the respective scripts e.g.
+This installed ANNarchy version 4.6.9.1, not version 4.6.8.1 which the ReScience authors used - more on that later. Individual figures could then be produced by running the respective scripts e.g.
 
-$ python Fig1_pairing.py
+    $ python Fig1_pairing.py
 
-The figures were automatically saved in the code directory. All scripts except Fig4_RF.py took less than 15 seconds to run. Fig4_RF.py took substantially longer at around 30 minutes.
+The figures were automatically saved in the code directory. All scripts except Fig4_RF.py took less than 15 seconds to run. Fig4_RF.py took substantially longer at around 30 minutes. A minor correction had to be made to Fig3_rateCode_stand.py and Fig3_tempCode_stand.py to make them run. ANNarchy was unable to parse some of the defining equations and the terms had to be placed on the LHS: Lines 33-34 in Fig3_rateCode_stand.py and lines 32-33 in Fig3_tempCode_stand.py were replaced with
+
+    tau_plus  * dx/dt + x = 0 : event-driven  
+    tau_minus * dy/dt +y = 0 : event-driven
+
+Figures C1, C3, and C5-10 were reproduced as in the ReScience paper. However figures C2 and C4 were not reproduced as expected, with all their data points well above those given in the ReScience paper. This may have been because the version of ANNarchy was different to the one used by the ReScience authors. 
+
+I attempted to use the correct version of ANNarchy by installing all the package versions given in the README when I set up the conda environment. These were Python 3.6, Numpy 1.11.0, Matplotlib 1.5.1 and ANNarchy 4.6.8.1 (and also Cython 0.19 which ANNarchy needs to be installed separately). The first problem arose here since ANNarchy automatically installs Scipy 1.5.2 which is incompatible with Numpy 1.11.0. After some trial and error I found that Scipy 0.19 worked and allowed the .py scripts to get to the compilation stage. At this point however, the scripts always hit an error:
+
+    Error compiling Cython file:
+    ------------------------------------------------------------
+    ...
+    # Wrapper for projection 2
+    cdef class proj2_wrapper :
+
+        def __cinit__(self, synapses):
+
+            cdef LIL syn = synapses
+                ^
+    ------------------------------------------------------------
+    ANNarchyCore0.pyx:1863:13: 'LIL' is not a type identifier
 
 
+I could not resolve this without updating to ANNarchy version 4.6.9.1 which is the version used to create the figures below.
+
+The final note to observe is the dependence of the results on the seed. Figures C5 and C9 varied slightly upon changing the seed, but generally retained the same features. Figure C10 on the other hand changed considerably. Whilst the original seed reproduced the receptive field as expected, the four alternative seeds I tried did not produce any receptive fields, only disparate dots. I have added the result of an alternative seed in Figure C11.
 
 \setcounter{table}{0}
 \setcounter{figure}{0}
@@ -88,7 +109,7 @@ The figures were automatically saved in the code directory. All scripts except F
 
 \clearpage
 
-```{r, echo=FALSE, fig.cap=manifest_df[1:10,"comment"]}
+```{r, echo=FALSE, fig.cap=manifest_df[1:11,"comment"]}
 # TODO turn into a loop 
 knitr::include_graphics(manifest_df[1, "dest"])
 cat('\n\n')
@@ -109,6 +130,8 @@ cat('\n\n')
 knitr::include_graphics(manifest_df[9, "dest"])
 cat('\n\n')
 knitr::include_graphics(manifest_df[10, "dest"])
+cat('\n\n')
+knitr::include_graphics(manifest_df[11, "dest"])
 ```
 
 \clearpage

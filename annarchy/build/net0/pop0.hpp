@@ -1,5 +1,5 @@
 /*
- *  ANNarchy-version: 4.6.9.1
+ *  ANNarchy-version: 4.6.8.1
  */
 #pragma once
 #include "ANNarchy.h"
@@ -36,20 +36,12 @@ struct PopStruct0{
 
     // Neuron specific parameters and variables
 
-    // Local parameter rates
-    std::vector< double > rates;
-
-    // Local variable p
-    std::vector< double > p;
-
     // Local variable r
     std::vector< double > r;
 
     // Global operations
 
     // Random numbers
-    std::vector<double> rand_0;
-    std::uniform_real_distribution< double > dist_rand_0;
 
 
 
@@ -64,20 +56,35 @@ struct PopStruct0{
         }
     };
 
+    // Custom local parameter spike_times
+    // std::vector< double > r ;
+    std::vector< std::vector< long int > > spike_times ;
+    std::vector< long int >  next_spike ;
+    std::vector< int > idx_next_spike;
+    long int _t;
+
+    // Recompute the spike times
+    void recompute_spike_times(){
+        std::fill(next_spike.begin(), next_spike.end(), -10000);
+        std::fill(idx_next_spike.begin(), idx_next_spike.end(), 0);
+        for(int i=0; i< size; i++){
+            if(!spike_times[i].empty()){
+                int idx = 0;
+                // Find the first spike time which is not in the past
+                while(spike_times[i][idx] < _t){
+                    idx++;
+                }
+                // Set the next spike
+                if(idx < spike_times[i].size())
+                    next_spike[i] = spike_times[i][idx];
+                else
+                    next_spike[i] = -10000;
+            }
+        }
+    }
+
 
     // Access methods to the parameters and variables
-
-    // Local parameter rates
-    std::vector< double > get_rates() { return rates; }
-    double get_single_rates(int rk) { return rates[rk]; }
-    void set_rates(std::vector< double > val) { rates = val; }
-    void set_single_rates(int rk, double val) { rates[rk] = val; }
-
-    // Local variable p
-    std::vector< double > get_p() { return p; }
-    double get_single_p(int rk) { return p[rk]; }
-    void set_p(std::vector< double > val) { p = val; }
-    void set_single_p(int rk, double val) { p[rk] = val; }
 
     // Local variable r
     std::vector< double > get_r() { return r; }
@@ -91,16 +98,8 @@ struct PopStruct0{
     void init_population() {
         _active = true;
 
-        // Local parameter rates
-        rates = std::vector<double>(size, 0.0);
-
-        // Local variable p
-        p = std::vector<double>(size, 0.0);
-
         // Local variable r
         r = std::vector<double>(size, 0.0);
-
-        rand_0 = std::vector<double>(size, 0.0);
 
 
         // Spiking variables
@@ -114,6 +113,11 @@ struct PopStruct0{
         _mean_fr_window = 0;
         _mean_fr_rate = 1.0;
 
+        _t = 0;
+        next_spike = std::vector<long int>(size, -10000);
+        idx_next_spike = std::vector<int>(size, 0);
+        this->recompute_spike_times();
+
 
     }
 
@@ -126,26 +130,18 @@ struct PopStruct0{
 
 
 
+        _t = 0;
+        this->recompute_spike_times();
+
     }
 
     // Init rng dist
     void init_rng_dist() {
-
-        dist_rand_0 = std::uniform_real_distribution< double >(0.0, 1.0);
-
+        
     }
 
     // Method to draw new random numbers
     void update_rng() {
-
-        if (_active){
-
-            for(int i = 0; i < size; i++) {
-
-                rand_0[i] = dist_rand_0(rng);
-
-            }
-        }
 
     }
 
@@ -167,81 +163,47 @@ struct PopStruct0{
     // Main method to update neural variables
     void update() {
 
-        if( _active ) {
+        if(_active){
             spiked.clear();
-
-            // Updating local variables
-            #pragma omp simd
             for(int i = 0; i < size; i++){
-
-                // p = Uniform(0.0, 1.0) * 1000.0 / dt
-                p[i] = 1000.0*rand_0[i]/dt;
-
-
-            }
-        } // active
-
-
-
-        if( _active ) {
-            for (int i = 0; i < size; i++) {
-                // Spike emission
-                if(p[i] < rates[i]){ // Condition is met
-                    // Reset variables
-
-                    // Store the spike
-
-                    {
+                // Emit spike
+                if( _t == next_spike[i] ){
+                    last_spike[i] = _t;
+                    /*
+                    while(++idx_next_spike[i]< spike_times[i].size()){
+                        if(spike_times[i][idx_next_spike[i]] > _t)
+                            break;
+                    }
+                    */
+                    idx_next_spike[i]++ ;
+                    if(idx_next_spike[i] < spike_times[i].size()){
+                        next_spike[i] = spike_times[i][idx_next_spike[i]];
+                    }
                     spiked.push_back(i);
-                    }
-                    last_spike[i] = t;
-
-                    // Refractory period
-
-
-                    // Update the mean firing rate
-                    if(_mean_fr_window> 0)
-                        _spike_history[i].push(t);
-
                 }
-
-                // Update the mean firing rate
-                if(_mean_fr_window> 0){
-                    while((_spike_history[i].size() != 0)&&(_spike_history[i].front() <= t - _mean_fr_window)){
-                        _spike_history[i].pop(); // Suppress spikes outside the window
-                    }
-                    r[i] = _mean_fr_rate * double(_spike_history[i].size());
-                }
-
-
-
             }
-        } // active
+            _t++;
+        }
 
     }
 
-
+    
 
     // Memory management: track the memory consumption
     long int size_in_bytes() {
         long int size_in_bytes = 0;
         // Parameters
-        size_in_bytes += sizeof(double) * rates.capacity();	// rates
         // Variables
-        size_in_bytes += sizeof(double) * p.capacity();	// p
         size_in_bytes += sizeof(double) * r.capacity();	// r
-
+        
         return size_in_bytes;
     }
 
     // Memory management: track the memory consumption
     void clear() {
         // Variables
-        p.clear();
-        p.shrink_to_fit();
         r.clear();
         r.shrink_to_fit();
-
+        
     }
 };
-

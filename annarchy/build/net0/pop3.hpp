@@ -1,5 +1,5 @@
 /*
- *  ANNarchy-version: 4.6.9.1
+ *  ANNarchy-version: 4.6.8.1
  */
 #pragma once
 #include "ANNarchy.h"
@@ -428,7 +428,7 @@ struct PopStruct3{
 
     // Init rng dist
     void init_rng_dist() {
-
+        
     }
 
     // Method to draw new random numbers
@@ -458,94 +458,87 @@ struct PopStruct3{
             spiked.clear();
 
             // Updating local variables
-            #pragma omp simd
+            
             for(int i = 0; i < size; i++){
-
+                
                 // dvm/dt = if state>=2:+3.462 else: if state==1:-vm + inter_vm +1/C*( - wad+b + z)+g_Exc else:1/C * ( -gL * (vm - EL) + gL * DeltaT * exp((vm - VT) / DeltaT) - wad + z ) + g_Exc
-                double _vm = (state[i] >= 2 ? 3.4620000000000002 : (state[i] == 1 ? g_Exc[i] + inter_vm[i] - vm[i] + (b - wad[i] + z[i])/C : g_Exc[i] + (DeltaT*gL*exp((-VT[i] + vm[i])/DeltaT) + (-gL)*(-EL + vm[i]) - wad[i] + z[i])/C));
-
+                double _vm = (state[i] >= 2 ? 3.4620000000000002 : (state[i] == 1 ? g_Exc[i] + inter_vm[i] - vm[i] + (b - wad[i] + z[i])/C : g_Exc[i] + (DeltaT*gL*exp((-VT[i] + vm[i])/DeltaT) - gL*(-EL + vm[i]) - wad[i] + z[i])/C));
+                
                 // dvmean/dt = (pos(vm - EL)**2 - vmean)/taumean
                 double _vmean = (-vmean[i] + pow(positive(-EL + vm[i]), 2))/taumean;
-
+                
                 // dumeanLTD/dt = (vm - umeanLTD)/tauLTD
                 double _umeanLTD = (-umeanLTD[i] + vm[i])/tauLTD;
-
+                
                 // dumeanLTP/dt = (vm - umeanLTP)/tauLTP
                 double _umeanLTP = (-umeanLTP[i] + vm[i])/tauLTP;
-
+                
                 // dxtrace /dt = (- xtrace )/taux
                 double _xtrace = -xtrace[i]/taux;
-
+                
                 // dwad/dt = if state==1:+b else: (a * (vm - EL) - wad)/tauw
                 double _wad = (state[i] == 1 ? b : (a*(-EL + vm[i]) - wad[i])/tauw);
-
+                
                 // dz/dt = if state==1:-z+Isp-10 else:-z/tauz
-                double _z = (state[i] == 1 ? Isp - z[i] - 10 : (-z[i])/tauz);
-
+                double _z = (state[i] == 1 ? Isp - z[i] - 10 : -z[i]/tauz);
+                
                 // dVT/dt =if state==2: 0 else: if state==1: -VT +VTMax else:(VTrest - VT)/tauVT
                 double _VT = (state[i] == 2 ? 0 : (state[i] == 1 ? -VT[i] + VTMax : (-VT[i] + VTrest)/tauVT));
-
+                
                 // dg_Exc/dt = -g_Exc/tau_gExc
                 double _g_Exc = -g_Exc[i]/tau_gExc;
-
+                
                 // dvm/dt = if state>=2:+3.462 else: if state==1:-vm + inter_vm +1/C*( - wad+b + z)+g_Exc else:1/C * ( -gL * (vm - EL) + gL * DeltaT * exp((vm - VT) / DeltaT) - wad + z ) + g_Exc
                 vm[i] += dt*_vm ;
-
-
+                
+                
                 // dvmean/dt = (pos(vm - EL)**2 - vmean)/taumean
                 vmean[i] += dt*_vmean ;
-
-
+                
+                
                 // dumeanLTD/dt = (vm - umeanLTD)/tauLTD
                 umeanLTD[i] += dt*_umeanLTD ;
-
-
+                
+                
                 // dumeanLTP/dt = (vm - umeanLTP)/tauLTP
                 umeanLTP[i] += dt*_umeanLTP ;
-
-
+                
+                
                 // dxtrace /dt = (- xtrace )/taux
                 xtrace[i] += dt*_xtrace ;
-
-
+                
+                
                 // dwad/dt = if state==1:+b else: (a * (vm - EL) - wad)/tauw
                 wad[i] += dt*_wad ;
-
-
+                
+                
                 // dz/dt = if state==1:-z+Isp-10 else:-z/tauz
                 z[i] += dt*_z ;
-
-
+                
+                
                 // dVT/dt =if state==2: 0 else: if state==1: -VT +VTMax else:(VTrest - VT)/tauVT
                 VT[i] += dt*_VT ;
-
-
+                
+                
                 // dg_Exc/dt = -g_Exc/tau_gExc
                 g_Exc[i] += dt*_g_Exc ;
-
-
+                
+                
                 // state = if state > 0: state-1 else:0
                 state[i] = (state[i] > 0 ? state[i] - 1 : 0);
-
-
+                
+                
                 // Spike = 0.0
                 Spike[i] = 0.0;
-
-
+                
+                
                 // dresetvar / dt = 1/(1.0) * (-resetvar)
-                double _resetvar = -1.0*resetvar[i];
-
+                double _resetvar = -resetvar[i];
+                
                 // dresetvar / dt = 1/(1.0) * (-resetvar)
                 resetvar[i] += dt*_resetvar ;
-
-
-            }
-        } // active
-
-
-
-        if( _active ) {
-            for (int i = 0; i < size; i++) {
+                
+                
                 // Spike emission
                 if(state[i] == 0 && vm[i] > VT[i]){ // Condition is met
                     // Reset variables
@@ -559,37 +552,36 @@ struct PopStruct3{
                     xtrace[i] += 1.0/taux;
 
                     // Store the spike
-
+                    
                     {
                     spiked.push_back(i);
                     }
                     last_spike[i] = t;
 
                     // Refractory period
-
-
+                    
+                    
                     // Update the mean firing rate
                     if(_mean_fr_window> 0)
                         _spike_history[i].push(t);
-
+            
                 }
-
+                
                 // Update the mean firing rate
                 if(_mean_fr_window> 0){
                     while((_spike_history[i].size() != 0)&&(_spike_history[i].front() <= t - _mean_fr_window)){
                         _spike_history[i].pop(); // Suppress spikes outside the window
                     }
-                    r[i] = _mean_fr_rate * double(_spike_history[i].size());
+                    r[i] = _mean_fr_rate * float(_spike_history[i].size());
                 }
-
-
+            
 
             }
         } // active
 
     }
 
-
+    
 
     // Memory management: track the memory consumption
     long int size_in_bytes() {
@@ -627,7 +619,7 @@ struct PopStruct3{
         size_in_bytes += sizeof(double) * Spike.capacity();	// Spike
         size_in_bytes += sizeof(double) * resetvar.capacity();	// resetvar
         size_in_bytes += sizeof(double) * r.capacity();	// r
-
+        
         return size_in_bytes;
     }
 
@@ -660,7 +652,6 @@ struct PopStruct3{
         resetvar.shrink_to_fit();
         r.clear();
         r.shrink_to_fit();
-
+        
     }
 };
-

@@ -36,7 +36,7 @@
 // power function for integer exponent
 inline double power(double x, unsigned int a){
     double res=x;
-    for (unsigned int i=0; i< a-1; i++){
+    for(int i=0; i< a-1; i++){
         res *= x;
     }
     return res;
@@ -62,6 +62,7 @@ inline double power(double x, unsigned int a){
 #include "pop0.hpp"
 #include "pop1.hpp"
 #include "pop2.hpp"
+#include "pop3.hpp"
 
 /*
  * Structures for the projections
@@ -69,6 +70,7 @@ inline double power(double x, unsigned int a){
  */
 #include "proj0.hpp"
 #include "proj1.hpp"
+#include "proj2.hpp"
 
 
 
@@ -88,6 +90,7 @@ extern std::mt19937  rng;
 extern PopStruct0 pop0;
 extern PopStruct1 pop1;
 extern PopStruct2 pop2;
+extern PopStruct3 pop3;
 
 
 /*
@@ -96,6 +99,7 @@ extern PopStruct2 pop2;
  */
 extern ProjStruct0 proj0;
 extern ProjStruct1 proj1;
+extern ProjStruct2 proj2;
 
 
 /*

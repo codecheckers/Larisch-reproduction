@@ -1,6 +1,8 @@
 Filename, Object Description
-pop0, PoissonPopulation( name = pop0 )
-pop1, Population( name = pop1 )
-pop2, Population( name = pop2 )
-proj0, Projection( pre = pop0, post = pop1, target = vm ) using connector: One-to-One, weights 30, delays 0.0 
-proj1, Projection( pre = pop1, post = pop2, target = Exc ) using connector: All-to-All, weights $\mathcal{U}$(0.0, 2.0), delays 0.0 
+pop0, SpikeSourceArray( name = pop0 )
+pop1, SpikeSourceArray( name = pop1 )
+pop2, Population( name = N1 )
+pop3, Population( name = N2 )
+proj0, Projection( pre = pop0, post = N1, target = Exc ) using connector: One-to-One, weights 30.0, delays 0.0 
+proj1, Projection( pre = pop1, post = N2, target = Exc ) using connector: One-to-One, weights 30.0, delays 0.0 
+proj2, Projection( pre = N1, post = N2, target = Exc ) using connector: One-to-One, weights 0.012, delays 0.0 

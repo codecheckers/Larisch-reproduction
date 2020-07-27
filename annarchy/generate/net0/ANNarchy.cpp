@@ -17,11 +17,13 @@ std::mt19937  rng;
 PopStruct0 pop0;
 PopStruct1 pop1;
 PopStruct2 pop2;
+PopStruct3 pop3;
 
 
 // Projections
 ProjStruct0 proj0;
 ProjStruct1 proj1;
+ProjStruct2 proj2;
 
 
 // Global operations
@@ -33,7 +35,7 @@ void addRecorder(Monitor* recorder){
     recorders.push_back(recorder);
 }
 void removeRecorder(Monitor* recorder){
-    for (unsigned int i=0; i<recorders.size(); i++){
+    for(int i=0; i<recorders.size(); i++){
         if(recorders[i] == recorder){
             recorders.erase(recorders.begin()+i);
             break;
@@ -87,12 +89,14 @@ void initialize(double _dt, long int seed) {
     pop0.init_population();
     pop1.init_population();
     pop2.init_population();
+    pop3.init_population();
 
 
     // Projections
     // Initialize projections
     proj0.init_projection();
     proj1.init_projection();
+    proj2.init_projection();
 
 
     // Custom constants
@@ -105,6 +109,7 @@ void init_rng_dist() {
 pop0.init_rng_dist();
 pop1.init_rng_dist();
 pop2.init_rng_dist();
+pop3.init_rng_dist();
 
 }
 
@@ -130,13 +135,14 @@ void singleStep()
 
     proj0.compute_psp();
     proj1.compute_psp();
+    proj2.compute_psp();
 
 
 
     ////////////////////////////////
     // Recording target variables
     ////////////////////////////////
-    for (unsigned int i=0; i < recorders.size(); i++){
+    for(int i=0; i < recorders.size(); i++){
         recorders[i]->record_targets();
     }
 
@@ -144,7 +150,6 @@ void singleStep()
     // Update random distributions
     ////////////////////////////////
 
-    pop0.update_rng();
 
 
 
@@ -155,6 +160,7 @@ void singleStep()
     pop0.update();
     pop1.update();
     pop2.update();
+    pop3.update();
 
 
 
@@ -172,7 +178,7 @@ void singleStep()
     // Update synaptic variables
     ////////////////////////////////
 
-    proj1.update_synapse();
+    proj2.update_synapse();
 
 
 
@@ -190,7 +196,7 @@ void singleStep()
     // Recording neural / synaptic variables
     ////////////////////////////////
 
-    for (unsigned int i=0; i < recorders.size(); i++){
+    for(int i=0; i < recorders.size(); i++){
         recorders[i]->record();
     }
 

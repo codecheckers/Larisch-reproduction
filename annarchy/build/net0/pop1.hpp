@@ -1,5 +1,5 @@
 /*
- *  ANNarchy-version: 4.6.9.1
+ *  ANNarchy-version: 4.6.8.1
  */
 #pragma once
 #include "ANNarchy.h"
@@ -36,30 +36,6 @@ struct PopStruct1{
 
     // Neuron specific parameters and variables
 
-    // Global parameter EL
-    double  EL ;
-
-    // Global parameter VTrest
-    double  VTrest ;
-
-    // Global parameter taux
-    double  taux ;
-
-    // Local variable g_vm
-    std::vector< double > g_vm;
-
-    // Local variable Spike
-    std::vector< double > Spike;
-
-    // Local variable Reset
-    std::vector< double > Reset;
-
-    // Local variable xtrace
-    std::vector< double > xtrace;
-
-    // Local variable state
-    std::vector< double > state;
-
     // Local variable r
     std::vector< double > r;
 
@@ -80,50 +56,35 @@ struct PopStruct1{
         }
     };
 
+    // Custom local parameter spike_times
+    // std::vector< double > r ;
+    std::vector< std::vector< long int > > spike_times ;
+    std::vector< long int >  next_spike ;
+    std::vector< int > idx_next_spike;
+    long int _t;
+
+    // Recompute the spike times
+    void recompute_spike_times(){
+        std::fill(next_spike.begin(), next_spike.end(), -10000);
+        std::fill(idx_next_spike.begin(), idx_next_spike.end(), 0);
+        for(int i=0; i< size; i++){
+            if(!spike_times[i].empty()){
+                int idx = 0;
+                // Find the first spike time which is not in the past
+                while(spike_times[i][idx] < _t){
+                    idx++;
+                }
+                // Set the next spike
+                if(idx < spike_times[i].size())
+                    next_spike[i] = spike_times[i][idx];
+                else
+                    next_spike[i] = -10000;
+            }
+        }
+    }
+
 
     // Access methods to the parameters and variables
-
-    // Global parameter EL
-    double get_EL() { return EL; }
-    void set_EL(double val) { EL = val; }
-
-    // Global parameter VTrest
-    double get_VTrest() { return VTrest; }
-    void set_VTrest(double val) { VTrest = val; }
-
-    // Global parameter taux
-    double get_taux() { return taux; }
-    void set_taux(double val) { taux = val; }
-
-    // Local variable g_vm
-    std::vector< double > get_g_vm() { return g_vm; }
-    double get_single_g_vm(int rk) { return g_vm[rk]; }
-    void set_g_vm(std::vector< double > val) { g_vm = val; }
-    void set_single_g_vm(int rk, double val) { g_vm[rk] = val; }
-
-    // Local variable Spike
-    std::vector< double > get_Spike() { return Spike; }
-    double get_single_Spike(int rk) { return Spike[rk]; }
-    void set_Spike(std::vector< double > val) { Spike = val; }
-    void set_single_Spike(int rk, double val) { Spike[rk] = val; }
-
-    // Local variable Reset
-    std::vector< double > get_Reset() { return Reset; }
-    double get_single_Reset(int rk) { return Reset[rk]; }
-    void set_Reset(std::vector< double > val) { Reset = val; }
-    void set_single_Reset(int rk, double val) { Reset[rk] = val; }
-
-    // Local variable xtrace
-    std::vector< double > get_xtrace() { return xtrace; }
-    double get_single_xtrace(int rk) { return xtrace[rk]; }
-    void set_xtrace(std::vector< double > val) { xtrace = val; }
-    void set_single_xtrace(int rk, double val) { xtrace[rk] = val; }
-
-    // Local variable state
-    std::vector< double > get_state() { return state; }
-    double get_single_state(int rk) { return state[rk]; }
-    void set_state(std::vector< double > val) { state = val; }
-    void set_single_state(int rk, double val) { state[rk] = val; }
 
     // Local variable r
     std::vector< double > get_r() { return r; }
@@ -136,30 +97,6 @@ struct PopStruct1{
     // Method called to initialize the data structures
     void init_population() {
         _active = true;
-
-        // Global parameter EL
-        EL = 0.0;
-
-        // Global parameter VTrest
-        VTrest = 0.0;
-
-        // Global parameter taux
-        taux = 0.0;
-
-        // Local variable g_vm
-        g_vm = std::vector<double>(size, 0.0);
-
-        // Local variable Spike
-        Spike = std::vector<double>(size, 0.0);
-
-        // Local variable Reset
-        Reset = std::vector<double>(size, 0.0);
-
-        // Local variable xtrace
-        xtrace = std::vector<double>(size, 0.0);
-
-        // Local variable state
-        state = std::vector<double>(size, 0.0);
 
         // Local variable r
         r = std::vector<double>(size, 0.0);
@@ -176,6 +113,11 @@ struct PopStruct1{
         _mean_fr_window = 0;
         _mean_fr_rate = 1.0;
 
+        _t = 0;
+        next_spike = std::vector<long int>(size, -10000);
+        idx_next_spike = std::vector<int>(size, 0);
+        this->recompute_spike_times();
+
 
     }
 
@@ -188,11 +130,14 @@ struct PopStruct1{
 
 
 
+        _t = 0;
+        this->recompute_spike_times();
+
     }
 
     // Init rng dist
     void init_rng_dist() {
-
+        
     }
 
     // Method to draw new random numbers
@@ -218,126 +163,47 @@ struct PopStruct1{
     // Main method to update neural variables
     void update() {
 
-        if( _active ) {
+        if(_active){
             spiked.clear();
-
-            // Updating local variables
-            #pragma omp simd
             for(int i = 0; i < size; i++){
-
-                // dg_vm/dt = EL/1000
-                double _g_vm = (1.0/1000.0)*EL;
-
-                // dg_vm/dt = EL/1000
-                g_vm[i] += dt*_g_vm ;
-                if(g_vm[i] < EL)
-                    g_vm[i] = EL;
-
-
-                // Spike = if state == 1: 1.0 else: 0.0
-                Spike[i] = (state[i] == 1 ? 1.0 : 0.0);
-
-
-                // dReset/dt = if state == 1: +1 else: -Reset
-                double _Reset = (state[i] == 1 ? 1 : -Reset[i]);
-
-                // dxtrace/dt = if state == 1: +1/taux else: -xtrace/taux
-                double _xtrace = (state[i] == 1 ? 1.0/taux : (-xtrace[i])/taux);
-
-                // dReset/dt = if state == 1: +1 else: -Reset
-                Reset[i] += dt*_Reset ;
-
-
-                // dxtrace/dt = if state == 1: +1/taux else: -xtrace/taux
-                xtrace[i] += dt*_xtrace ;
-
-
-                // state = if state >0: -1 else: 0
-                state[i] = (state[i] > 0 ? -1 : 0);
-
-
-            }
-        } // active
-
-
-
-        if( _active ) {
-            for (int i = 0; i < size; i++) {
-                // Spike emission
-                if(g_vm[i] > VTrest){ // Condition is met
-                    // Reset variables
-
-                    g_vm[i] = EL;
-
-                    state[i] = 1;
-
-                    // Store the spike
-
-                    {
+                // Emit spike
+                if( _t == next_spike[i] ){
+                    last_spike[i] = _t;
+                    /*
+                    while(++idx_next_spike[i]< spike_times[i].size()){
+                        if(spike_times[i][idx_next_spike[i]] > _t)
+                            break;
+                    }
+                    */
+                    idx_next_spike[i]++ ;
+                    if(idx_next_spike[i] < spike_times[i].size()){
+                        next_spike[i] = spike_times[i][idx_next_spike[i]];
+                    }
                     spiked.push_back(i);
-                    }
-                    last_spike[i] = t;
-
-                    // Refractory period
-
-
-                    // Update the mean firing rate
-                    if(_mean_fr_window> 0)
-                        _spike_history[i].push(t);
-
                 }
-
-                // Update the mean firing rate
-                if(_mean_fr_window> 0){
-                    while((_spike_history[i].size() != 0)&&(_spike_history[i].front() <= t - _mean_fr_window)){
-                        _spike_history[i].pop(); // Suppress spikes outside the window
-                    }
-                    r[i] = _mean_fr_rate * double(_spike_history[i].size());
-                }
-
-
-
             }
-        } // active
+            _t++;
+        }
 
     }
 
-
+    
 
     // Memory management: track the memory consumption
     long int size_in_bytes() {
         long int size_in_bytes = 0;
         // Parameters
-        size_in_bytes += sizeof(double);	// EL
-        size_in_bytes += sizeof(double);	// VTrest
-        size_in_bytes += sizeof(double);	// taux
         // Variables
-        size_in_bytes += sizeof(double) * g_vm.capacity();	// g_vm
-        size_in_bytes += sizeof(double) * Spike.capacity();	// Spike
-        size_in_bytes += sizeof(double) * Reset.capacity();	// Reset
-        size_in_bytes += sizeof(double) * xtrace.capacity();	// xtrace
-        size_in_bytes += sizeof(double) * state.capacity();	// state
         size_in_bytes += sizeof(double) * r.capacity();	// r
-
+        
         return size_in_bytes;
     }
 
     // Memory management: track the memory consumption
     void clear() {
         // Variables
-        g_vm.clear();
-        g_vm.shrink_to_fit();
-        Spike.clear();
-        Spike.shrink_to_fit();
-        Reset.clear();
-        Reset.shrink_to_fit();
-        xtrace.clear();
-        xtrace.shrink_to_fit();
-        state.clear();
-        state.shrink_to_fit();
         r.clear();
         r.shrink_to_fit();
-
+        
     }
 };
-

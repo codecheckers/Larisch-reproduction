@@ -32,6 +32,9 @@ manifest:
     comment: manuscript Figure 4a
   - file: Fig4_RF.png
     comment: manuscript Figure 4b
+  - file: Fig4_RF_1.png
+    comment: manuscript Figure 4b with alternative seed
+
 
 codechecker:
   - name: Iain Davies

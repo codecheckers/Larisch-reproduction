@@ -173,13 +173,11 @@ struct ProjStruct2{
 
         int nb_post;
         double sum;
-
+        
         // Event-based summation
         if (_transmission && pop3._active){
-
-
             // Iterate over all incoming spikes (possibly delayed constantly)
-
+            
             for(int _idx_j = 0; _idx_j < pop2.spiked.size(); _idx_j++){
                 // Rank of the presynaptic neuron
                 int rk_j = pop2.spiked[_idx_j];
@@ -191,28 +189,28 @@ struct ProjStruct2{
                 std::vector< std::pair<int, int> >& inv_post = inv_post_ptr->second;
                 // Number of post neurons
                 int nb_post = inv_post.size();
-
-
+        
+                
                 // Iterate over connected post neurons
                 for(int _idx_i = 0; _idx_i < nb_post; _idx_i++){
                     // Retrieve the correct indices
                     int i = inv_post[_idx_i].first;
                     int j = inv_post[_idx_i].second;
-
+        
                     // Event-driven integration
-
+                    
                     // Update conductance
-
+                    
                     pop3.g_Exc[post_rank[i]] +=  transmit*w[i][j];
-
+        
                     // Synaptic plasticity: pre-events
-
+                    
                 }
             }
-
-
+        
+            
         } // active
-
+        
     }
 
     // Draws random numbers
@@ -225,40 +223,40 @@ struct ProjStruct2{
 
         int rk_post, rk_pre;
         double _dt = dt * _update_period;
-
+        
         // Check periodicity
         if(_transmission && _update && pop3._active && ( (t - _update_offset)%_update_period == 0L) ){
             // Global variables
-
+            
             // Local variables
-
+            
             for(int i = 0; i < post_rank.size(); i++){
                 rk_post = post_rank[i]; // Get postsynaptic rank
                 // Semi-global variables
-
+                
                 // Local variables
                 for(int j = 0; j < pre_rank[i].size(); j++){
                     rk_pre = pre_rank[i][j]; // Get presynaptic rank
-
+                        
                     // ltdTerm_fix = if w>wMin : (aLTD*(vmean_fix/urefsquare)*pre.Spike * pos(post.umeanLTD - thetaLTD)) else : 0.0
                     ltdTerm_fix[i][j] = (w[i][j] > wMin ? pop2.Spike[rk_pre]*aLTD*vmean_fix*positive(pop3.umeanLTD[rk_post] - thetaLTD)/urefsquare : 0.0);
-
-
+                    
+                    
                     // ltdTerm = if w>wMin : (aLTD*(post.vmean/urefsquare)*pre.Spike * pos(post.umeanLTD - thetaLTD)) else : 0.0
                     ltdTerm[i][j] = (w[i][j] > wMin ? pop3.vmean[rk_post]*pop2.Spike[rk_pre]*aLTD*positive(pop3.umeanLTD[rk_post] - thetaLTD)/urefsquare : 0.0);
-
-
+                    
+                    
                     // ltpTerm = if w<wMax : (aLTP * pos(post.vm - thetaLTP) *(pre.xtrace)* pos(post.umeanLTP - thetaLTD)) else : 0.0
                     ltpTerm[i][j] = (w[i][j] < wMax ? pop2.xtrace[rk_pre]*aLTP*positive(pop3.umeanLTP[rk_post] - thetaLTD)*positive(pop3.vm[rk_post] - thetaLTP) : 0.0);
-
-
+                    
+                    
                     // deltaW = if set_fix==1: ltpTerm - ltdTerm_fix else: ltpTerm - ltdTerm
                     deltaW[i][j] = (set_fix == 1 ? -ltdTerm_fix[i][j] + ltpTerm[i][j] : -ltdTerm[i][j] + ltpTerm[i][j]);
-
-
+                    
+                    
                     // dw/_dt = deltaW
                     double _w = deltaW[i][j];
-
+                    
                     // dw/_dt = deltaW
                     if(_plasticity){
                     w[i][j] += _dt*_w ;
@@ -266,13 +264,13 @@ struct ProjStruct2{
                         w[i][j] = 0.0;
                     if(w[i][j] > wMax)
                         w[i][j] = wMax;
-
+                    
                     }
-
+                    
                 }
             }
         }
-
+        
     }
 
     // Post-synaptic events
@@ -431,7 +429,7 @@ struct ProjStruct2{
         size_in_bytes += sizeof(double);	// transmit
         // global parameter set_fix
         size_in_bytes += sizeof(double);	// set_fix
-
+        
         return size_in_bytes;
     }
 
@@ -450,7 +448,6 @@ struct ProjStruct2{
         deltaW.shrink_to_fit();
         w.clear();
         w.shrink_to_fit();
-
+        
     }
 };
-

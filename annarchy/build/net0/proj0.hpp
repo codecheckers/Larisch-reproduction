@@ -1,16 +1,16 @@
 #pragma once
 
 #include "pop0.hpp"
-#include "pop1.hpp"
+#include "pop2.hpp"
 
 
 
 extern PopStruct0 pop0;
-extern PopStruct1 pop1;
+extern PopStruct2 pop2;
 
 
 /////////////////////////////////////////////////////////////////////////////
-// proj0: pop0 -> pop1 with target vm
+// proj0: pop0 -> N1 with target Exc
 /////////////////////////////////////////////////////////////////////////////
 struct ProjStruct0{
     // Number of dendrites
@@ -71,7 +71,7 @@ struct ProjStruct0{
                 inv_pre_rank[pre_rank[i][j]].push_back(std::pair<int, int>(i,j));
             }
         }
-        inv_post_rank =  std::vector< int > (pop1.size, -1);
+        inv_post_rank =  std::vector< int > (pop2.size, -1);
         for(int i=0; i<post_rank.size(); i++){
             inv_post_rank[post_rank[i]] = i;
         }
@@ -88,13 +88,11 @@ struct ProjStruct0{
 
         int nb_post;
         double sum;
-
+        
         // Event-based summation
-        if (_transmission && pop1._active){
-
-
+        if (_transmission && pop2._active){
             // Iterate over all incoming spikes (possibly delayed constantly)
-
+            
             for(int _idx_j = 0; _idx_j < pop0.spiked.size(); _idx_j++){
                 // Rank of the presynaptic neuron
                 int rk_j = pop0.spiked[_idx_j];
@@ -106,28 +104,28 @@ struct ProjStruct0{
                 std::vector< std::pair<int, int> >& inv_post = inv_post_ptr->second;
                 // Number of post neurons
                 int nb_post = inv_post.size();
-
-
+        
+                
                 // Iterate over connected post neurons
                 for(int _idx_i = 0; _idx_i < nb_post; _idx_i++){
                     // Retrieve the correct indices
                     int i = inv_post[_idx_i].first;
                     int j = inv_post[_idx_i].second;
-
+        
                     // Event-driven integration
-
+                    
                     // Update conductance
-
-                    pop1.g_vm[post_rank[i]] +=  w;
-
+                    
+                    pop2.g_Exc[post_rank[i]] +=  w;
+        
                     // Synaptic plasticity: pre-events
-
+                    
                 }
             }
-
-
+        
+            
         } // active
-
+        
     }
 
     // Draws random numbers
@@ -168,7 +166,7 @@ struct ProjStruct0{
         long int size_in_bytes = 0;
         // local parameter w
         size_in_bytes += sizeof(double);	// w
-
+        
         return size_in_bytes;
     }
 
@@ -177,7 +175,6 @@ struct ProjStruct0{
         std::cout << "PopStruct0::clear()" << std::endl;
     #endif
         // Variables
-
+        
     }
 };
-
