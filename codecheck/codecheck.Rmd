@@ -82,7 +82,7 @@ The figures were automatically saved in the code directory. All scripts except F
 
 Figures C1, C3, and C5-10 were reproduced as in the ReScience paper. However figures C2 and C4 were not reproduced as expected, with all their data points well above those given in the ReScience paper. This may have been because the version of ANNarchy was different to the one used by the ReScience authors. 
 
-I attempted to use the correct version of ANNarchy by installing all the package versions given in the README when I set up the conda environment. These were Python 3.6, Numpy 1.11.0, Matplotlib 1.5.1 and ANNarchy 4.6.8.1 (and also Cython 0.19 which ANNarchy needs to be installed separately). The first problem arose here since ANNarchy automatically installs Scipy 1.5.2 which is incompatible with Numpy 1.11.0. After some trial and error I found that Scipy 0.19 worked and allowed the .py scripts to get to the compilation stage. At this point however, the scripts always hit an error:
+I attempted to use the correct version of ANNarchy by installing all the package versions given in the README when I set up the conda environment. These were Python 3.6, Numpy 1.11.0, Matplotlib 1.5.1 and ANNarchy 4.6.8.1 (and also Cython 0.19 which ANNarchy needs to be installed separately), all of which I pip installed since Conda didn't have some of the package versions. The first problem arose here since ANNarchy automatically installs Scipy 1.5.2 which is incompatible with Numpy 1.11.0. After some trial and error I found that Scipy 0.19 worked and allowed the .py scripts to get to the compilation stage. At this point however, the scripts always hit an error:
 
     Error compiling Cython file:
     ------------------------------------------------------------
