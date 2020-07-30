@@ -1,2 +1,2 @@
-cython3 -3 ANNarchyCore0.pyx --cplus
+cython -2 ANNarchyCore0.pyx --cplus
 Makefile:3: recipe for target 'all' failed

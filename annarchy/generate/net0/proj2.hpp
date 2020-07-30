@@ -260,10 +260,10 @@ struct ProjStruct2{
                     // dw/_dt = deltaW
                     if(_plasticity){
                     w[i][j] += _dt*_w ;
-                    if(w[i][j] < 0.0)
-                        w[i][j] = 0.0;
                     if(w[i][j] > wMax)
                         w[i][j] = wMax;
+                    if(w[i][j] < 0.0)
+                        w[i][j] = 0.0;
                     
                     }
                     
