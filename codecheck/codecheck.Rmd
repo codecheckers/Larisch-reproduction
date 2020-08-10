@@ -140,7 +140,7 @@ knitr::include_graphics(manifest_df[11, "dest"])
 
 ## Acknowledgements
 
-I would like to thank Dr Bhatt and his team for promptly answering any
+I would like to thank Mr Larisch for promptly answering any
 queries I had with this reproduction.  CODECHECK is financially
 supported by the Mozilla foundation.
 
