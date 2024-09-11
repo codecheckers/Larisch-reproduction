@@ -7,9 +7,7 @@ paper:
   authors:
     - name: Rene Larisch
       ORCID: 0000-0003-3544-0631
-  reference: >
-    ReScience C (2019) 5, 3, 2
-    http://rescience.github.io/bibliography/Larisch_2019.html
+  reference: https://doi.org/10.5281/zenodo.3538217
 
 manifest:
   - file: codecheck/figures/Fig1_clamp.png
